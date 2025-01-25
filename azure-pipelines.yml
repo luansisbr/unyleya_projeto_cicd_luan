@@ -22,7 +22,7 @@ steps:
   displayName: Build and push an image to container registry
   inputs:
     command: buildAndPush
-    repository: $(imageRepository)
+    repository: $(luansisbr89/unyleya_pos)
     tags: $(imageTag)
     dockerfile: Dockerfile
     containerRegistry: https://index.docker.io/v1/
