@@ -1,28 +1,43 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
 - main
 
-pool:
-  vmImage: 'ubuntu-latest'
+resources:
+- repo: self
 
-steps:
-- task: Docker@2
-  displayName: Log in to Docker Hub
-  inputs:
-    command: login
-    server: https://index.docker.io/v1/
-    username: $(luansisbr89)
-    password: $(Cloud@36226947)
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '7f9dc28e-5551-43ee-891f-33bf61a995de'
+  imageRepository: 'usernamepipelinesjavascriptdocker'
+  containerRegistry: 'repoistoryname.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/app/Dockerfile'
+  tag: '$(Build.BuildId)'
 
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
 - task: Docker@2
-  displayName: Build and push an image to container registry
   inputs:
-    command: buildAndPush
-    repository: $(luansisbr89/unyleya_pos)
-    tags: $(imageTag)
-    dockerfile: Dockerfile
-    containerRegistry: https://index.docker.io/v1/
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
