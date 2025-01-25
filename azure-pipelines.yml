@@ -5,39 +5,23 @@
 trigger:
 - main
 
-resources:
-- repo: self
+pool:
+  vmImage: 'ubuntu-latest'
 
-variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '7f9dc28e-5551-43ee-891f-33bf61a995de'
-  imageRepository: 'usernamepipelinesjavascriptdocker'
-  containerRegistry: 'repoistoryname.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/app/Dockerfile'
-  tag: '$(Build.BuildId)'
-
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
-
-stages:
-- stage: Build
-  displayName: Build and push stage
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
-      inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
+steps:
 - task: Docker@2
+  displayName: Log in to Docker Hub
   inputs:
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
+    command: login
+    server: https://index.docker.io/v1/
+    username: $(luansisbr89)
+    password: $(Cloud@36226947)
+
+- task: Docker@2
+  displayName: Build and push an image to container registry
+  inputs:
+    command: buildAndPush
+    repository: $(luansisbr89/unyleya_pos)
+    tags: $(imageTag)
+    dockerfile: Dockerfile
+    containerRegistry: 'DockerHubConnection'
