@@ -7,37 +7,33 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- main
+- main  # Gatilho para o branch principal (ou outro branch)
 
-resources:
-- repo: self
+pool:
+  vmImage: 'ubuntu-latest'  # Máquina virtual usada no pipeline
 
-variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '7f9dc28e-5551-43ee-891f-33bf61a995de'
-  imageRepository: 'luansisbr89'
-  containerRegistry: 'luansisbr89/unyleya_pos'
-  dockerfilePath: '$(Build.SourcesDirectory)/app/Dockerfile'
-  tag: '$(Build.BuildId)'
+steps:
+# Etapa 1: Baixar código do GitHub
+- task: UsePythonVersion@1
+  inputs:
+    versionSpec: '3.x'
+    addToPath: true
 
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+- task: Checkout@1  # Clonar o código do repositório
+  displayName: 'Checkout do Repositório'
 
-stages:
-- stage: Build
-  displayName: Build and push stage
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
-      inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
+# Etapa 2: Configurar Docker Build
+- task: Docker@2
+  displayName: 'Build da Imagem Docker'
+  inputs:
+    containerRegistry: 'docker'  # Nome da conexão no Azure
+    repository: 'luansisbr89/unyleya_pos'                # Nome do repositório Docker
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      latest
+
+# Etapa 3: Executar Testes (Opcional)
+- script: |
+    python -m unittest
+  displayName: 'Executar Testes Automatizados'
