@@ -4,22 +4,25 @@
 # https://aka.ms/yaml
 
 trigger:
-  - main
+- main
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.x'
-      addToPath: true
+- task: Docker@2
+  displayName: Log in to Docker Hub
+  inputs:
+    command: login
+    server: https://index.docker.io/v1/
+    username: $(luansisbr89)
+    password: $(Cloud@36226947)
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
-    displayName: 'Install Dependencies'
-
-  - script: |
-      echo "Build successful!"
-    displayName: 'Build Application'
+- task: Docker@2
+  displayName: Build and push an image to container registry
+  inputs:
+    command: buildAndPush
+    repository: $(imageRepository)
+    tags: $(imageTag)
+    dockerfile: Dockerfile
+    containerRegistry: https://index.docker.io/v1/
