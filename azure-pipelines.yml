@@ -16,19 +16,21 @@ variables:
   imageName: 'luansisbr89/unyleya_pos'
 
 steps:
-- task: UsePythonVersion@0
+# Passo 1: Baixar o arquivo seguro com as credenciais do Docker Hub
+- task: DownloadSecureFile@1
   inputs:
-    versionSpec: '3.x'
-    addToPath: true
-    - task: Docker@2
-  inputs:
-    containerRegistry: 'DockerHub'
-    command: 'login'
+    secureFile: 'DOCKER_HUB_USERNAME=luansisbr89'
+    name: 'dockerhubCredentials'
+    retryCount: '3'
 
+# Passo 2: Fazer login no Docker Hub
 - script: |
-    pip install -r requirements.txt
-  displayName: 'Install dependencies'
+    source $(dockerhubCredentials.secureFilePath)
+    echo "Logging in to Docker Hub..."
+    echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+  displayName: 'Login to Docker Hub'
 
+# Passo 3: Construir e enviar a imagem Docker
 - task: Docker@2
   inputs:
     containerRegistry: 'DockerHub'
