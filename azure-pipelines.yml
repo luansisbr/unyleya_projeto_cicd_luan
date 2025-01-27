@@ -20,6 +20,10 @@ steps:
   inputs:
     versionSpec: '3.x'
     addToPath: true
+    - task: Docker@2
+  inputs:
+    containerRegistry: 'DockerHub'
+    command: 'login'
 
 - script: |
     pip install -r requirements.txt
